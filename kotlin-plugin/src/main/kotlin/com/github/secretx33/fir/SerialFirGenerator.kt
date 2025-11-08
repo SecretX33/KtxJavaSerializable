@@ -23,6 +23,36 @@ import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
+/**
+ *  ## What does this class do?
+ *  Modifies Kotlin classes that implements [java.io.Serializable] but doesn't declare an explicit `serialVersionUID`
+ *  property by adding a companion object (if missing) and a serialVersionUID property to it.
+ *
+ *  It automatically skips classes that already have a `serialVersionUID` property declared.
+ *
+ *  ## What is this class?
+ *  This class is a FIR (Frontend Intermediate Representation) declaration generation extension for the Kotlin compiler,
+ *  so it doesn't add any initializer to the property (because it can't), which means that the property has no
+ *  value until the IR (Intermediate Representation) phase, where another extension adds the initializer.
+ *
+ *  ## Example
+ *  Before applying this generator, a serializable class like:
+ *  ```kt
+ *  class MySerializableClass : java.io.Serializable {
+ *  }
+ *  ```
+ *
+ *  Will become:
+ *  ```kt
+ *  // After
+ *  class MySerializableClass : java.io.Serializable {
+ *
+ *    private companion object {  // ← The plugin adds a private companion object (if not present)
+ *      private const val serialVersionUID: Long  // ← And the serialVersionUID property (note the absence of any value)
+ *    }
+ *  }
+ *  ```
+ */
 class SerialFirGenerator(
     session: FirSession,
     private val messageCollector: MessageCollector,
@@ -33,7 +63,7 @@ class SerialFirGenerator(
         val COMPANION_NAME = Name.identifier("Companion")
     }
 
-    private val predicateKey = object : GeneratedDeclarationKey()
+    private val predicateKey = object : GeneratedDeclarationKey() {}
 
     /**
      * Returns what nested classes or objects should exist inside this class.
@@ -81,7 +111,9 @@ class SerialFirGenerator(
         }
 
         // Create empty companion object (its properties will be added later in getCallableNamesForClass)
-        return createCompanionObject(owner, predicateKey).symbol
+        return createCompanionObject(owner, predicateKey) {
+            visibility = Visibilities.Private
+        }.symbol
     }
 
     /**
@@ -128,8 +160,7 @@ class SerialFirGenerator(
                 && generatedProperties.none { it.name == SERIAL_VERSION_UID_NAME }
         } ?: return generatedProperties
 
-        // Set initial value to 1L (you could implement proper serialVersionUID calculation here)
-        // For proper calculation, you'd need to hash class structure like Java does
+        // Add serialVersionUID property to companion object
         val property = createMemberProperty(
             owner = owner,
             key = predicateKey,
