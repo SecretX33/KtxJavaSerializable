@@ -1,10 +1,9 @@
 dependencies {
     implementation(project(":common"))
-    implementation(kotlin("stdlib"))
-    compileOnly(kotlin("compiler-embeddable"))
+    compileOnly(kotlin("compiler"))
     compileOnly("com.google.auto.service:auto-service:1.1.1")
     kapt("com.google.auto.service:auto-service:1.1.1")
     testImplementation(kotlin("test-junit"))
-    testImplementation(kotlin("compiler-embeddable"))
+    testImplementation(kotlin("compiler"))
     testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.9")
 }
