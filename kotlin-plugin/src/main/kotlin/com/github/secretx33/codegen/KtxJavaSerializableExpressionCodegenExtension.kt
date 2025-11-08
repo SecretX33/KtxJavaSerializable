@@ -3,6 +3,7 @@
 //import com.github.secretx33.SERIALIZABLE_FQ_PROPERTY_NAME
 //import com.github.secretx33.SERIALIZABLE_OPTCODES
 //import com.github.secretx33.util.shouldGenerateSerialVersionProperty
+//import org.jetbrains.kotlin.codegen.ExpressionCodegen
 //import org.jetbrains.kotlin.codegen.FunctionGenerationStrategy
 //import org.jetbrains.kotlin.codegen.ImplementationBodyCodegen
 //import org.jetbrains.kotlin.codegen.extensions.ExpressionCodegenExtension
@@ -18,11 +19,13 @@
 //import org.jetbrains.kotlin.descriptors.annotations.Annotations
 //import org.jetbrains.kotlin.descriptors.impl.ClassConstructorDescriptorImpl
 //import org.jetbrains.kotlin.descriptors.impl.PropertyDescriptorImpl
+//import org.jetbrains.kotlin.metadata.jvm.JvmProtoBuf
 //import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
 //import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassOrAny
 //import org.jetbrains.kotlin.resolve.jvm.AsmTypes
 //import org.jetbrains.kotlin.resolve.jvm.annotations.findJvmOverloadsAnnotation
 //import org.jetbrains.kotlin.resolve.jvm.diagnostics.JvmDeclarationOrigin
+//import org.jetbrains.kotlin.resolve.jvm.jvmSignature.JvmMethodSignature
 //import org.jetbrains.org.objectweb.asm.Opcodes
 //import org.jetbrains.org.objectweb.asm.commons.InstructionAdapter
 //
