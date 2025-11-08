@@ -1,4 +1,4 @@
-package com.github.secretx33.codegen
+package com.github.secretx33.ir
 
 import com.github.secretx33.SERIALIZABLE_DEFAULT_VALUE
 import com.github.secretx33.SERIALIZABLE_FQ_PROPERTY_NAME

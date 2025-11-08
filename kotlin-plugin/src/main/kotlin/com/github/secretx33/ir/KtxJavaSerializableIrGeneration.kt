@@ -1,4 +1,4 @@
-package com.github.secretx33.codegen
+package com.github.secretx33.ir
 
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
