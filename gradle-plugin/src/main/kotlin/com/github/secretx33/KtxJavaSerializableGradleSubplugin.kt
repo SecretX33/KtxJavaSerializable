@@ -8,8 +8,9 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
 import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
 
+@Suppress("unused") // Used by service loader
 @AutoService(KotlinCompilerPluginSupportPlugin::class)
-class KtxJavaSerializableGradleSubplugin : KotlinCompilerPluginSupportPlugin {
+class KtxJavaSerializableGradlePlugin : KotlinCompilerPluginSupportPlugin {
 
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>): Boolean {
         check(kotlinCompilation.platformType == KotlinPlatformType.jvm) { "'$PLUGIN_ID' can only be used in JVM targeted projects" }
