@@ -37,19 +37,20 @@ import org.jetbrains.kotlin.name.Name
  *  value until the IR (Intermediate Representation) phase, where another extension adds the initializer.
  *
  *  ## Example
+ *  ### Before
  *  Before applying this generator, a serializable class like:
  *  ```kt
  *  class MySerializableClass : java.io.Serializable {
  *  }
  *  ```
  *
- *  Will become:
+ *  ### After
+ *  After applying this generator, the class will be transformed to:
  *  ```kt
- *  // After
  *  class MySerializableClass : java.io.Serializable {
  *
  *    private companion object {  // ← The plugin adds a private companion object (if not present)
- *      private const val serialVersionUID: Long  // ← And the serialVersionUID property (note the absence of any value)
+ *      private const val serialVersionUID: Long  // ← and the serialVersionUID property (note the absence of any value)
  *    }
  *  }
  *  ```
