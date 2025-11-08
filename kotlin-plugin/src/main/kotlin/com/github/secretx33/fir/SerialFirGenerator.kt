@@ -26,7 +26,6 @@ import org.jetbrains.kotlin.name.Name
 class SerialFirGenerator(
     session: FirSession,
     private val messageCollector: MessageCollector,
-    private val defaultSerialVersionUID: Long,
 ) : FirDeclarationGenerationExtension(session) {
     private companion object {
         val SERIALIZABLE_CLASS_ID = ClassId.topLevel(FqName("java.io.Serializable"))

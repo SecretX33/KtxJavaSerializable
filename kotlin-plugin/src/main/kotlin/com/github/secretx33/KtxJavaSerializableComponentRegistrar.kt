@@ -2,7 +2,9 @@ package com.github.secretx33
 
 import com.github.secretx33.configuration.parseConfiguration
 import com.github.secretx33.fir.SerialFirExtensionRegistrar
+import com.github.secretx33.ir.KtxJavaSerializableIrGeneration
 import com.google.auto.service.AutoService
+import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
@@ -20,6 +22,11 @@ class KtxJavaSerializableComponentRegistrar : CompilerPluginRegistrar() {
         if (!config.enabled) return
 
         val messageCollector = configuration.get(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
-        FirExtensionRegistrarAdapter.registerExtension(SerialFirExtensionRegistrar(messageCollector, config.defaultSerialVersionUID))
+
+        // Register FIR extension (frontend - declares structure)
+        FirExtensionRegistrarAdapter.registerExtension(SerialFirExtensionRegistrar(messageCollector))
+
+        // Register IR extension (backend - adds initializer)
+        IrGenerationExtension.registerExtension(KtxJavaSerializableIrGeneration(messageCollector, config.defaultSerialVersionUID))
     }
 }

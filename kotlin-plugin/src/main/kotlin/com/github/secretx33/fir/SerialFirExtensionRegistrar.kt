@@ -6,9 +6,8 @@ import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 
 class SerialFirExtensionRegistrar(
     private val messageCollector: MessageCollector,
-    private val defaultSerialVersionUID: Long,
 ) : FirExtensionRegistrar() {
     override fun ExtensionRegistrarContext.configurePlugin() {
-        +{ session: FirSession -> SerialFirGenerator(session, messageCollector, defaultSerialVersionUID) }
+        +{ session: FirSession -> SerialFirGenerator(session, messageCollector) }
     }
 }
