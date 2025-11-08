@@ -52,18 +52,18 @@ class KtxJavaSerializableIrElementTransformer(
         messageCollector.info("Found serialVersionUID property: ${serialVersionUIDProperty.name}")
 
         // Get the backing field (should already exist from FIR)
-        val backingField = serialVersionUIDProperty.backingField
-        if (backingField == null) {
+        val backingField = serialVersionUIDProperty.backingField ?: run {
             messageCollector.error("No backing field for serialVersionUID in ${irClass.name}")
             return irClass
         }
 
         // Add the initializer to the existing backing field
-        backingField.initializer = irClass.factory.createExpressionBody(
+        val serializerInitializerExpression = irClass.factory.createExpressionBody(
             startOffset = SYNTHETIC_OFFSET,
             endOffset = SYNTHETIC_OFFSET,
             expression = defaultSerialVersionUID.toIrConst(context.irBuiltIns.longType)
         )
+        backingField.initializer = serializerInitializerExpression
 
         messageCollector.info("Successfully added initializer (value: $defaultSerialVersionUID) to serialVersionUID")
         messageCollector.info("${"-".repeat(100)}\n[MODIFIED!!] Name: ${irClass.name}. Dump: \n${irClass.dump(DumpIrTreeOptions(stableOrder = true))}")
