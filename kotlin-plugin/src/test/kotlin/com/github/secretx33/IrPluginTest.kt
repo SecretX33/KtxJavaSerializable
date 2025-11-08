@@ -1,9 +1,7 @@
 package com.github.secretx33
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
-import org.jetbrains.kotlin.config.JvmDefaultMode
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class IrPluginTest {
@@ -30,20 +28,3 @@ class MyClassWithSerial(
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }
 }
-
-@Suppress("UNCHECKED_CAST")
-fun compile(
-    sourceFiles: List<SourceFile>,
-    plugin: CompilerPluginRegistrar = KtxJavaSerializableComponentRegistrar(),
-): KotlinCompilation.Result = KotlinCompilation().apply {
-    sources = sourceFiles
-    compilerPluginRegistrars = listOf(plugin)
-    inheritClassPath = true
-    jvmDefault = JvmDefaultMode.ALL_COMPATIBILITY.description
-    jvmTarget = "1.8"
-}.compile()
-
-fun compile(
-    sourceFile: SourceFile,
-    plugin: CompilerPluginRegistrar = KtxJavaSerializableComponentRegistrar(),
-): KotlinCompilation.Result = compile(listOf(sourceFile), plugin)
