@@ -1,6 +1,6 @@
 package com.github.secretx33.ir
 
-import com.github.secretx33.SERIALIZABLE_FQ_PROPERTY_NAME
+import com.github.secretx33.configuration.SERIALIZABLE_FQ_PROPERTY_NAME
 import com.github.secretx33.util.error
 import com.github.secretx33.util.info
 import com.github.secretx33.util.isSerializable

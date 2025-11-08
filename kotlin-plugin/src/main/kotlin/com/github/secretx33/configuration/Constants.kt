@@ -1,4 +1,4 @@
-package com.github.secretx33
+package com.github.secretx33.configuration
 
 import com.github.secretx33.util.enumSetOf
 import org.jetbrains.kotlin.descriptors.ClassKind

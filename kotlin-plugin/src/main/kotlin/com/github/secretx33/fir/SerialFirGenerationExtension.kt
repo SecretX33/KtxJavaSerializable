@@ -1,8 +1,8 @@
 package com.github.secretx33.fir
 
-import com.github.secretx33.COMPANION_CLASS_NAME
-import com.github.secretx33.SERIALIZABLE_CLASS_ID
-import com.github.secretx33.SERIAL_VERSION_UID_NAME
+import com.github.secretx33.configuration.COMPANION_CLASS_NAME
+import com.github.secretx33.configuration.SERIALIZABLE_CLASS_ID
+import com.github.secretx33.configuration.SERIAL_VERSION_UID_NAME
 import com.github.secretx33.util.info
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
