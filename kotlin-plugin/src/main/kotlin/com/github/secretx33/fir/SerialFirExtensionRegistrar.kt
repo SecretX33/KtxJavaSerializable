@@ -8,6 +8,6 @@ class SerialFirExtensionRegistrar(
     private val messageCollector: MessageCollector,
 ) : FirExtensionRegistrar() {
     override fun ExtensionRegistrarContext.configurePlugin() {
-        +{ session: FirSession -> SerialFirGenerator(session, messageCollector) }
+        +{ session: FirSession -> SerialFirGenerationExtension(session, messageCollector) }
     }
 }

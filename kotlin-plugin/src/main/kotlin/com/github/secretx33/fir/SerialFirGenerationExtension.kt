@@ -55,7 +55,7 @@ import org.jetbrains.kotlin.name.Name
  *  }
  *  ```
  */
-class SerialFirGenerator(
+class SerialFirGenerationExtension(
     session: FirSession,
     private val messageCollector: MessageCollector,
 ) : FirDeclarationGenerationExtension(session) {
