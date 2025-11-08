@@ -1,7 +1,8 @@
 package com.github.secretx33
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
+import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
+import org.jetbrains.kotlin.config.JvmDefaultMode
 import org.junit.Test
 import kotlin.test.assertEquals
 
@@ -30,18 +31,19 @@ class MyClassWithSerial(
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 fun compile(
     sourceFiles: List<SourceFile>,
-    plugin: ComponentRegistrar = KtxJavaSerializableComponentRegistrar(),
-): KotlinCompilation.Result =
-    KotlinCompilation().apply {
-        sources = sourceFiles
-        useIR = true
-        compilerPlugins = listOf(plugin)
-        inheritClassPath = true
-    }.compile()
+    plugin: CompilerPluginRegistrar = KtxJavaSerializableComponentRegistrar(),
+): KotlinCompilation.Result = KotlinCompilation().apply {
+    sources = sourceFiles
+    compilerPluginRegistrars = listOf(plugin)
+    inheritClassPath = true
+    jvmDefault = JvmDefaultMode.ALL_COMPATIBILITY.description
+    jvmTarget = "1.8"
+}.compile()
 
 fun compile(
     sourceFile: SourceFile,
-    plugin: ComponentRegistrar = KtxJavaSerializableComponentRegistrar(),
+    plugin: CompilerPluginRegistrar = KtxJavaSerializableComponentRegistrar(),
 ): KotlinCompilation.Result = compile(listOf(sourceFile), plugin)

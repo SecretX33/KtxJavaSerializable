@@ -1,5 +1,8 @@
 package com.github.secretx33.fir
 
+import com.github.secretx33.COMPANION_CLASS_NAME
+import com.github.secretx33.SERIALIZABLE_CLASS_ID
+import com.github.secretx33.SERIAL_VERSION_UID_NAME
 import com.github.secretx33.util.info
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -19,8 +22,6 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 import org.jetbrains.kotlin.fir.types.ConeClassLikeType
 import org.jetbrains.kotlin.name.CallableId
-import org.jetbrains.kotlin.name.ClassId
-import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 /**
@@ -57,13 +58,7 @@ class SerialFirGenerator(
     session: FirSession,
     private val messageCollector: MessageCollector,
 ) : FirDeclarationGenerationExtension(session) {
-    private companion object {
-        val SERIALIZABLE_CLASS_ID = ClassId.topLevel(FqName("java.io.Serializable"))
-        val SERIAL_VERSION_UID_NAME = Name.identifier("serialVersionUID")
-        val COMPANION_NAME = Name.identifier("Companion")
-    }
-
-    private val predicateKey = object : GeneratedDeclarationKey() {}
+    private object DeclarationKey : GeneratedDeclarationKey()
 
     /**
      * Returns what nested classes or objects should exist inside this class.
@@ -89,7 +84,7 @@ class SerialFirGenerator(
         val companionClassExists = classSymbol.declarationSymbols.any {
             it is FirRegularClassSymbol && it.isCompanion
         }
-        return superClassifiers + setOfNotNull(COMPANION_NAME.takeIf { !companionClassExists })
+        return superClassifiers + setOfNotNull(COMPANION_CLASS_NAME.takeIf { !companionClassExists })
     }
 
     /**
@@ -106,12 +101,12 @@ class SerialFirGenerator(
         super.generateNestedClassLikeDeclaration(owner, name, context)?.let { return it }
 
         // Only generate companion object for Serializable classes
-        if (name != COMPANION_NAME || !owner.implementsSerializable()) {
+        if (name != COMPANION_CLASS_NAME || !owner.implementsSerializable()) {
             return null
         }
 
         // Create empty companion object (its properties will be added later in getCallableNamesForClass)
-        return createCompanionObject(owner, predicateKey) {
+        return createCompanionObject(owner, DeclarationKey) {
             visibility = Visibilities.Private
         }.symbol
     }
@@ -163,7 +158,7 @@ class SerialFirGenerator(
         // Add serialVersionUID property to companion object
         val property = createMemberProperty(
             owner = owner,
-            key = predicateKey,
+            key = DeclarationKey,
             name = SERIAL_VERSION_UID_NAME,
             returnType = session.builtinTypes.longType.coneType,
             isVal = true,
