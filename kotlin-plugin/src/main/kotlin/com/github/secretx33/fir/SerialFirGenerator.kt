@@ -42,15 +42,15 @@ class SerialFirGenerator(session: FirSession) : FirDeclarationGenerationExtensio
      * the actual implementation
      *
      *  It's part of a two-step generation process:
-     *  1. Step 1 (getNestedClassifiersNames): "These nested classifiers will exist"
-     *  2. Step 2 (generateClassLikeDeclaration): "Here's the actual implementation of that nested classifier"
+     *  1. Step 1: Declaration Phase (getNestedClassifiersNames): "These nested classifiers will exist"
+     *  2. Step 2: Generation Phase (generateClassLikeDeclaration): "Here's the actual implementation of that nested classifier"
      */
     override fun getNestedClassifiersNames(
         classSymbol: FirClassSymbol<*>,
         context: NestedClassGenerationContext,
     ): Set<Name> {
         val superClassifiers = super.getNestedClassifiersNames(classSymbol, context)
-        if (!implementsSerializable(classSymbol)) return superClassifiers
+        if (!classSymbol.implementsSerializable()) return superClassifiers
 
         // Check if companion object already exists
         val companionClassExists = classSymbol.declarationSymbols.any {
@@ -73,7 +73,7 @@ class SerialFirGenerator(session: FirSession) : FirDeclarationGenerationExtensio
         super.generateNestedClassLikeDeclaration(owner, name, context)?.let { return it }
 
         // Only generate companion object for Serializable classes
-        if (name != COMPANION_NAME || !implementsSerializable(owner)) {
+        if (name != COMPANION_NAME || !owner.implementsSerializable()) {
             return null
         }
 
@@ -81,14 +81,26 @@ class SerialFirGenerator(session: FirSession) : FirDeclarationGenerationExtensio
         return createCompanionObject(owner, predicateKey).symbol
     }
 
+    /**
+     * Returns what callable names (properties/functions/constructors) should exist inside this class.
+     *
+     * The contract:
+     * - Input: A class symbol
+     * - Output: A set of names representing callables to generate
+     * - Effect: For each name this function return, the compiler will later call it back to requesting
+     * the actual implementation
+     *
+     * It's part of a two-step generation process:
+     * 1. Step 1: Declaration Phase (getCallableNamesForClass): "These callables will exist"
+     * 2. Step 2 Generation Phase (generateProperties/generateFunctions): "Here's the actual implementation of that callable"
+     */
     override fun getCallableNamesForClass(classSymbol: FirClassSymbol<*>, context: MemberGenerationContext): Set<Name> {
         val superCallableNames = super.getCallableNamesForClass(classSymbol, context)
 
         // Only generate for companion objects of Serializable classes
-        classSymbol.takeIf { it.isCompanion }
-            ?.getContainingClassSymbol()
-            ?.takeIf(::implementsSerializable)
-            ?: return superCallableNames
+        if (!classSymbol.isCompanionWithSerializableParent()) {
+            return superCallableNames
+        }
 
         // Check if serialVersionUID already exists
         val hasSerialVersionUID = classSymbol.declarationSymbols.any {
@@ -97,12 +109,19 @@ class SerialFirGenerator(session: FirSession) : FirDeclarationGenerationExtensio
         return superCallableNames + setOfNotNull(SERIAL_VERSION_UID_NAME.takeIf { !hasSerialVersionUID })
     }
 
+    /**
+     * Generates the actual property implementation.
+     *
+     * See: [getCallableNamesForClass] KDoc for more details.
+     */
     override fun generateProperties(
         callableId: CallableId,
         context: MemberGenerationContext?
     ): List<FirPropertySymbol> {
+        val generatedProperties = super.generateProperties(callableId, context)
+        if (callableId.callableName != SERIAL_VERSION_UID_NAME) return generatedProperties
+
         val owner = context?.owner ?: return emptyList()
-        if (callableId.callableName != SERIAL_VERSION_UID_NAME) return emptyList()
         if (!owner.isCompanion) return emptyList()
 
         val outerClass = owner.getContainingClassSymbol(session) ?: return emptyList()
@@ -131,11 +150,15 @@ class SerialFirGenerator(session: FirSession) : FirDeclarationGenerationExtensio
         return listOf(property.symbol)
     }
 
-    private fun implementsSerializable(classSymbol: FirClassLikeSymbol<*>): Boolean {
-        if (classSymbol !is FirRegularClassSymbol) return false
+    private fun FirClassLikeSymbol<*>?.isCompanionWithSerializableParent(): Boolean =
+        this?.let {
+            it.isCompanion && it.getContainingClassSymbol().implementsSerializable()
+        } == true
 
-        return classSymbol.resolvedSuperTypes.any { superType ->
-            (superType as? ConeClassLikeType)?.lookupTag?.classId == SERIALIZABLE_CLASS_ID
-        }
-    }
+    private fun FirClassLikeSymbol<*>?.implementsSerializable(): Boolean =
+        (this as? FirClassSymbol<*>)?.let {
+            resolvedSuperTypes.any { superType ->
+                (superType as? ConeClassLikeType)?.lookupTag?.classId == SERIALIZABLE_CLASS_ID
+            }
+        } == true
 }
