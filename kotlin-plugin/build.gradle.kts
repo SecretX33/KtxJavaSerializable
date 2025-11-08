@@ -7,3 +7,9 @@ dependencies {
     testImplementation(kotlin("compiler"))
     testImplementation("com.github.tschuchortdev:kotlin-compile-testing:1.4.9")
 }
+
+kotlin {
+    compilerOptions {
+        optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi")
+    }
+}
