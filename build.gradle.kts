@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -19,7 +20,7 @@ subprojects {
     apply(plugin = "kotlin")
     apply(plugin = "kotlin-kapt")
 
-    val javaVersion = "1.8"
+    val javaVersion = JvmTarget.JVM_1_8
 
 //    dependencies {
 //        testImplementation(kotlin("test"))
@@ -30,15 +31,16 @@ subprojects {
 //    }
 
     tasks.withType<JavaCompile> {
-        sourceCompatibility = javaVersion
-        targetCompatibility = javaVersion
-        options.encoding = "UTF-8"
+        options.apply {
+            release.set(javaVersion.name.substringAfterLast("_").toInt())
+            encoding = "UTF-8"
+        }
     }
 
     tasks.withType<KotlinCompile> {
-        kotlinOptions {
+        compilerOptions {
             freeCompilerArgs = listOf("-Xjsr305=strict", "-Xjvm-default=all")
-            jvmTarget = javaVersion
+            jvmTarget = JvmTarget.JVM_1_8
         }
     }
 }
