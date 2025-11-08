@@ -3,29 +3,24 @@ package com.github.secretx33
 import com.github.secretx33.codegen.KtxJavaSerializableIrGeneration
 import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
-import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.com.intellij.mock.MockProject
-import org.jetbrains.kotlin.compiler.plugin.ComponentRegistrar
+import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
+import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
+import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 
-@AutoService(ComponentRegistrar::class)
-class KtxJavaSerializableComponentRegistrar(private val isEnabled: String) : ComponentRegistrar {
+@OptIn(ExperimentalCompilerApi::class)
+@AutoService(CompilerPluginRegistrar::class)
+class KtxJavaSerializableComponentRegistrar : CompilerPluginRegistrar() {
+    override val supportsK2 = true
 
-    @Suppress("unused") // Used by service loader
-    constructor() : this(isEnabled = "true")
-
-    override fun registerProjectComponents(
-        project: MockProject,
+    override fun ExtensionStorage.registerExtensions(
         configuration: CompilerConfiguration,
     ) {
         if (configuration[KEY_ENABLED] == false) {
             return
         }
-        val messageCollector = configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
-
-//        ExpressionCodegenExtension.registerExtension(project, KtxJavaSerializableExpressionCodegenExtension())
-//        ClassBuilderInterceptorExtension.registerExtension(project, KtxJavaSerializableClassGenerationInterceptor())
-        IrGenerationExtension.registerExtension(project, KtxJavaSerializableIrGeneration(messageCollector))
+        val messageCollector = configuration.get(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
+        IrGenerationExtension.registerExtension(KtxJavaSerializableIrGeneration(messageCollector))
     }
 }
