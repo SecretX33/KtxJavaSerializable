@@ -3,13 +3,10 @@ package com.github.secretx33.fir
 import com.github.secretx33.util.info
 import org.jetbrains.kotlin.GeneratedDeclarationKey
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
-import org.jetbrains.kotlin.codegen.JvmCodegenUtil.isConst
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.descriptors.Visibilities
 import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.analysis.checkers.getContainingClassSymbol
-import org.jetbrains.kotlin.fir.declarations.impl.FirResolvedDeclarationStatusImpl
-import org.jetbrains.kotlin.fir.declarations.impl.FirResolvedDeclarationStatusWithAlteredDefaults
 import org.jetbrains.kotlin.fir.declarations.utils.isCompanion
 import org.jetbrains.kotlin.fir.extensions.FirDeclarationGenerationExtension
 import org.jetbrains.kotlin.fir.extensions.MemberGenerationContext
@@ -20,9 +17,7 @@ import org.jetbrains.kotlin.fir.symbols.impl.FirClassLikeSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirPropertySymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
-import org.jetbrains.kotlin.fir.toEffectiveVisibility
 import org.jetbrains.kotlin.fir.types.ConeClassLikeType
-import org.jetbrains.kotlin.ir.util.dump
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -31,6 +26,7 @@ import org.jetbrains.kotlin.name.Name
 class SerialFirGenerator(
     session: FirSession,
     private val messageCollector: MessageCollector,
+    private val defaultSerialVersionUID: Long,
 ) : FirDeclarationGenerationExtension(session) {
     private companion object {
         val SERIALIZABLE_CLASS_ID = ClassId.topLevel(FqName("java.io.Serializable"))
@@ -133,6 +129,8 @@ class SerialFirGenerator(
                 && generatedProperties.none { it.name == SERIAL_VERSION_UID_NAME }
         } ?: return generatedProperties
 
+        // Set initial value to 1L (you could implement proper serialVersionUID calculation here)
+        // For proper calculation, you'd need to hash class structure like Java does
         val property = createMemberProperty(
             owner = owner,
             key = predicateKey,
@@ -140,24 +138,9 @@ class SerialFirGenerator(
             returnType = session.builtinTypes.longType.coneType,
             isVal = true,
         ) {
-            status {
-                this.isConst = true
-                this.visibility = Visibilities.Private
-                this.modality = Modality.FINAL
-            }
-            status(
-                FirResolvedDeclarationStatusWithAlteredDefaults(
-                    visibility = Visibilities.Private,
-                    modality = Modality.FINAL,
-                    effectiveVisibility = Visibilities.Private.toEffectiveVisibility(owner, forClass = false)
-                )
-            )
-
-            // Mark as const
-            isConst = true
-
-            // Set initial value to 1L (you could implement proper serialVersionUID calculation here)
-            // For proper calculation, you'd need to hash class structure like Java does
+            visibility = Visibilities.Private
+            modality = Modality.FINAL
+            status { isConst = true } // Const also makes the property static
         }
 
         messageCollector.info("${"-".repeat(100)}\n[MODIFIED!!] Name: ${owner.name}. Added property: ${property.name}")

@@ -1,11 +1,14 @@
 package com.github.secretx33.fir
 
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.fir.FirSession
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 
-class SerialFirExtensionRegistrar(private val messageCollector: MessageCollector) : FirExtensionRegistrar() {
+class SerialFirExtensionRegistrar(
+    private val messageCollector: MessageCollector,
+    private val defaultSerialVersionUID: Long,
+) : FirExtensionRegistrar() {
     override fun ExtensionRegistrarContext.configurePlugin() {
-//        +::
-        TODO("Not yet implemented")
+        +{ session: FirSession -> SerialFirGenerator(session, messageCollector, defaultSerialVersionUID) }
     }
 }

@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":common"))
     implementation(kotlin("stdlib"))
     implementation(kotlin("gradle-plugin-api"))
     compileOnly("com.google.auto.service:auto-service:1.1.1")

@@ -1,4 +1,5 @@
 dependencies {
+    implementation(project(":common"))
     implementation(kotlin("stdlib"))
     compileOnly(kotlin("compiler-embeddable"))
     compileOnly("com.google.auto.service:auto-service:1.1.1")
